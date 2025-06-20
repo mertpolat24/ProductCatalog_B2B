@@ -1,0 +1,19 @@
+﻿@page "/login"
+
+<h1 class="text-center text-primary">Giriş Yap</h1>
+
+<form>
+    <input class="form-control" @bind="email" placeholder="E-Posta" />
+    <input type="password" class="form-control" @bind="password" placeholder="Şifre" />
+    <button class="btn btn-primary" @onclick="LoginUser">Giriş</button>
+</form>
+
+@code {
+    string email;
+    string password;
+
+    void LoginUser()
+    {
+        
+    }
+}
