@@ -1,19 +1,51 @@
-﻿@inherits LayoutComponentBase
+﻿    @inherits LayoutComponentBase
+    @inject NavigationManager NavManager
 
-<PageTitle>Solvo-Web</PageTitle>
+    @using Microsoft.AspNetCore.WebUtilities
+    @using Solvo_Core.Models
+    @using Solvo_Web.Pages
+    @using static Solvo_Web.Shared.NavMenu
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+
+
+<CascadingValue Value="Filters">
+    <div class="app-layout">
+        <div class="sidebar">
+            <nav>
+                <ul>
+                    <li><NavLink class="btn btn-outline-primary me-2" href="/" Match="NavLinkMatch.All">🏠 Ana Sayfa</NavLink></li>                    
+                    <li><NavLink class="btn btn-outline-primary me-2" href="/products" Match="NavLinkMatch.All">📦 Ürünler</NavLink></li>
+                    <button class="btn btn-outline-primary mb-2" @onclick="() => ShowFilters = !ShowFilters">
+                        @(ShowFilters ? "Filtreleri Gizle" : "Filtreleri Göster")
+                    </button>
+                </ul>
+            </nav>
+            @if (ShowFilters)
+            {
+                <div class="mt-4 px-3">
+                    <input class="form-control mb-2" placeholder="Kategori" @bind="Filters.Category" />
+                    <input class="form-control mb-2" placeholder="Marka" @bind="Filters.Brand" />
+                    <input class="form-control mb-2" type="number" placeholder="Min ₺" min="0" @bind="Filters.MinPrice" />
+                    <input class="form-control mb-2" type="number" placeholder="Max ₺" min="0" @bind="Filters.MaxPrice" />
+                    <input class="form-check-input" type="checkbox" @bind="Filters.OnlyInStock" />
+                    <label class="form-check-label">Stokta Olanlar</label>
+                </div>
+            }
+         </div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+    <div class="main-content">
+        @Body
+    </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+</CascadingValue>
+
+@code {
+    private FilterModel Filters = new();
+    private bool ShowFilters = false;
+
+    private void OnFilterChanged(ChangeEventArgs e)
+    {
+        StateHasChanged(); 
+    }
+    }

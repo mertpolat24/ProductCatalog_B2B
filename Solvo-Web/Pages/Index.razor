@@ -1,9 +1,50 @@
-﻿@page "/"
+﻿@page "/index"
+@inject IRepositoryManager _manager
+@using Solvo_Core.Models
+@using Solvo_Repository.UnitOfWork
 
-<PageTitle>Index</PageTitle>
+<h3> Ana Menü</h3>
 
-<h1>Hello, world!</h1>
+@if (products is null)
+{
+    <p>Yükleniyor...</p>
+}
+else if (!products.Any())
+{
+    <p>Ürün bulunamadı.</p>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>İsim</th>
+                <th>Marka</th>
+                <th>Kategori</th>
+                <th>Fiyat</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in products)
+            {
+                <tr>
+                    <td>@p.Id</td>
+                    <td>@p.Name</td>
+                    <td>@p.Brand?.Name</td>
+                    <td>@p.Category?.Name</td>
+                    <td>@p.Price ₺</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
-Welcome to your new app.
+@code {
+    private List<Product> products;
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    protected override async Task OnInitializedAsync()
+    {
+        products = _manager.ProductRepository.FindAll().ToList();
+    }
+}

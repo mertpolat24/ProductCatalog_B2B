@@ -1,8 +1,29 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: row;
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #eee;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+
 
 h1:focus {
     outline: none;

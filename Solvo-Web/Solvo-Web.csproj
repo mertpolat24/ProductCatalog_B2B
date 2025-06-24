@@ -4,7 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Solvo_Web</RootNamespace>
+    <RootNamespace>Solvo_Web</RootNamespace>  
+    <EnableDefaultContentItems>true</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,10 +16,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.36" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.3.0" />
+
+
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Solvo-Service\Solvo-Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\img\images.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

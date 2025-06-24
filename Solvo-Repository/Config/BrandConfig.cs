@@ -15,7 +15,7 @@ namespace Solvo_Repository.Config
         {
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Name).IsRequired().HasColumnType("nvarchar(50)");
-            builder.HasMany(c => c.Products).WithOne(c => c.Brand).HasForeignKey(c => c.CategoryId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasMany(c => c.Products).WithOne(c => c.Brand).HasForeignKey(c => c.BrandId).OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

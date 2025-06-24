@@ -1,39 +1,52 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Solvo-Web</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿@code {
+    private string SelectedCategory { get; set; } = "";
+    private string SelectedBrand { get; set; } = "";
+    private decimal? MinPrice { get; set; }
+    private decimal? MaxPrice { get; set; }
+    private bool OnlyInStock { get; set; } = false;
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    [Parameter]
+    public EventCallback<FilterModel> OnFilterApplied { get; set; }
 
-@code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    private async Task ApplyFilters()
     {
-        collapseNavMenu = !collapseNavMenu;
+        var filter = new FilterModel
+            {
+                Category = SelectedCategory,
+                Brand = SelectedBrand,
+                MinPrice = MinPrice,
+                MaxPrice = MaxPrice,
+                OnlyInStock = OnlyInStock
+            };
+
+        await OnFilterApplied.InvokeAsync(filter);
+    }
+
+    public class FilterModel
+    {
+        public string Category { get; set; } = "";
+        public string Brand { get; set; } = "";
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public bool OnlyInStock { get; set; }
     }
 }
+<nav class="navbar navbar-light bg-light p-3">
+    <a class="navbar-brand" href="#">Ana Menü</a>
+
+    <form class="d-flex align-items-center">
+
+        <input class="form-control me-2" placeholder="Kategori" @bind="SelectedCategory" />
+
+        <input class="form-control me-2" placeholder="Marka" @bind="SelectedBrand" />
+
+        <input class="form-control me-2" type="number" placeholder="Min ₺" @bind="MinPrice" />
+
+        <input class="form-control me-2" type="number" placeholder="Max ₺" @bind="MaxPrice" />
+
+        <div class="form-check me-2">
+            <input class="form-check-input" type="checkbox" @bind="OnlyInStock" id="onlyInStockCheck" />
+            <label class="form-check-label" for="onlyInStockCheck">Stokta Olanlar</label>
+        </div>
+    </form>
+</nav>

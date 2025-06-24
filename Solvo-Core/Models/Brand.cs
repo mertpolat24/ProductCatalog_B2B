@@ -11,7 +11,8 @@ namespace Solvo_Core.Models
     public class Brand : BaseEntity
     {
         public string Name { get; set; }
-        public int ProductId { get; set; }
+        public int CategoryId { get; set; }
+        public Category Categories { get; set; }
         public ICollection<Product> Products { get; set; }
     }
 }
