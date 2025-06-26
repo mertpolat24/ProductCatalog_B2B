@@ -10,6 +10,5 @@ namespace Solvo_Repository.Contracts
 {
     public interface IProductRepository : IRepositoryBase<Product>
     {
-        IQueryable<Product> GetByFiltered(int? categoryId = null, List<int?> brandIdList = null, bool? inStock = null, (decimal? minPrice, decimal? maxPrice)? priceRange = null, bool? orderByPrice = null);
     }
 }

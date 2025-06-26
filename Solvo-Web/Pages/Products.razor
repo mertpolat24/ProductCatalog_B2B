@@ -3,102 +3,180 @@
 @using Solvo_Core.Abstract
 @using Solvo_Core.Models
 @using Solvo_Service.Contracts
+@using Solvo_Web.Data
 @using static Solvo_Web.Shared.NavMenu
 @inject NavigationManager NavManager
+@inject AppState AppState
 
 
 <h1 class="h3 mb-4 text-gray-800">Ürün Listesi</h1>
 
-<button class="btn btn-outline-primary mb-3" @onclick="ToggleView">
-    @(IsCardView ? "Liste Görünümüne Geç" : "Kart Görünümüne Geç")
-</button>
-@if (IsCardView)
-{
-    <div class="row">
-        @foreach (var product in FilteredProducts)
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-outline-primary" @onclick="ToggleView">
+        @(IsCardView ? "Liste Görünümüne Geç" : "Kart Görünümüne Geç")
+    </button>
+</div>
+
+<div class="row">
+    <div class="col-lg-3 col-md-4 mb-4">
+        <div class="card p-3">
+            <h6 class="mb-3">Filtrele</h6>
+
+            <select class="form-control mb-2" @bind="Filters.Category">
+                <option value="">Kategori Seç</option>
+                @foreach (var category in AvailableCategories)
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+
+            <select class="form-control mb-2" @bind="Filters.Brand">
+                <option value="">Marka Seç</option>
+                @foreach (var brand in AvailableBrands)
+                {
+                    <option value="@brand">@brand</option>
+                }
+            </select>
+
+            <input class="form-control mb-2" type="number" placeholder="Min ₺" min="0" @bind="Filters.MinPrice" />
+            <input class="form-control mb-2" type="number" placeholder="Max ₺" min="0" @bind="Filters.MaxPrice" />
+
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="stokta" @bind-value="Filters.OnlyInStock" />
+                <label class="form-check-label" for="stokta">Stokta Olanlar</label>
+            </div>
+
+            <button class="btn btn-sm btn-success w-100 mt-2" @onclick="ApplyFilters">Filtrele</button>
+        </div>
+    </div>
+
+    <div class="col-lg-9 col-md-8">
+        @if (IsCardView)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card shadow h-100">
-                    <div class="card-body">
-                        <img src="@product.ImagePath" alt="Test Resim" style="width:200px;" />
-                        <h5 class="card-title">@product.Name</h5>
-                        <p class="card-text">@product.Description</p>
-                        <span class="badge bg-info">@product.Category?.Name</span>
-                        <span class="badge bg-secondary">@product.Brand?.Name</span>
-                        <p class="mt-2"><b>Fiyat:</b> @product.Price ₺</p>
-                        <p><b>Stok:</b> @product.Stock</p>
+            <div class="row">
+                @foreach (var product in FilteredProducts)
+                {
+                    <div class="col-12 col-sm-6 col-lg-4 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <img src="@product.ImagePath" alt="Görsel" class="img-fluid mb-2" style="max-height: 150px;" />
+                                <h5 class="card-title">@product.Name</h5>
+                                <p class="card-text">@product.Description</p>
+                                <span class="badge bg-light text-dark me-1">@product.Category?.Name</span>
+                                <span class="badge bg-light text-dark">@product.Brand?.Name</span>
+                                <p class="mt-2"><b>Fiyat:</b> @product.Price ₺</p>
+                                <p><b>Stok:</b> @product.Stock</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>İsim</th>
+                        <th>Marka</th>
+                        <th>Kategori</th>
+                        <th>Açıklama</th>
+                        <th>Fiyat</th>
+                        <th>Stok</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in FilteredProducts)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td>@p.Name</td>
+                            <td>@p.Brand?.Name</td>
+                            <td>@p.Category?.Name</td>
+                            <td>@p.Description</td>
+                            <td>@p.Price ₺</td>
+                            <td>@p.Stock</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+        @if (FilteredProducts == null || !FilteredProducts.Any())
+        {
+            <div class="alert alert-warning text-center">
+                Aradığınız kriterlere uygun ürün bulunamadı.
             </div>
         }
     </div>
-}
-else
-{
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>İsim</th>
-                <th>Marka</th>
-                <th>Kategori</th>
-                <th>Fiyat</th>
-                <th>Stok</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in FilteredProducts)
-            {
-                <tr>
-                    <td>@p.Id</td>
-                    <td>@p.Name</td>
-                    <td>@p.Brand?.Name</td>
-                    <td>@p.Category?.Name</td>
-                    <td>@p.Price ₺</td>
-                    <td>@p.Stock</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+</div>
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "search")]
+    public string Search { get; set; }
     private List<Product> AllProducts = new();
     private List<Product> FilteredProducts = new();
-
+    private List<string> AvailableCategories = new();
+    private List<string> AvailableBrands = new();
     private bool IsCardView = false;
+    private FilterModel Filters = new();
 
-    [CascadingParameter]
-    private FilterModel Filters { get; set; }
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         AllProducts = ProductService.GetAllProduct().ToList();
         FilteredProducts = AllProducts;
 
 
+        AvailableCategories = AllProducts
+           .Where(p => p.Category != null)
+           .Select(p => p.Category!.Name!)
+           .Distinct()
+           .OrderBy(x => x)
+           .ToList();
+
+        await InvokeAsync(() => AppState.LayoutActive = true);
+
+        AvailableBrands = AllProducts
+            .Where(p => p.Brand != null)
+            .Select(p => p.Brand!.Name!)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
     }
+
+
     protected override void OnParametersSet()
     {
         ApplyFilters();
     }
 
-    private void ToggleView()
-    {
-        IsCardView = !IsCardView;
-    }
+    private void ToggleView() => IsCardView = !IsCardView;
 
     public void ApplyFilters()
     {
-        FilteredProducts = AllProducts
-                .Where(p =>
-                    (string.IsNullOrEmpty(Filters.Category) || (p.Category?.Name == Filters.Category)) &&
-                    (string.IsNullOrEmpty(Filters.Brand) || (p.Brand?.Name == Filters.Brand)) &&
-                    (!Filters.MinPrice.HasValue || p.Price >= Filters.MinPrice) &&
-                    (!Filters.MaxPrice.HasValue || p.Price <= Filters.MaxPrice) &&
-                    (!Filters.OnlyInStock || p.Stock > 0)
-                )
-                .ToList();
+        var filtered = AllProducts.AsEnumerable();
 
+        if (Filters is not null)
+        {
+            filtered = filtered.Where(p =>
+                (string.IsNullOrEmpty(Filters.Category) || p.Category?.Name == Filters.Category) &&
+                (string.IsNullOrEmpty(Filters.Brand) || p.Brand?.Name == Filters.Brand) &&
+                (!Filters.MinPrice.HasValue || p.Price >= Filters.MinPrice) &&
+                (!Filters.MaxPrice.HasValue || p.Price <= Filters.MaxPrice || Filters.MaxPrice == 0) &&
+                (!Filters.OnlyInStock || p.Stock > 0) &&
+                (p.Status == Solvo_Core.Enums.BaseStatus.Active)
+            );
+
+        }
+
+        if (!string.IsNullOrEmpty(Search))
+        {
+            filtered = filtered.Where(p => p.Name.Contains(Search, StringComparison.OrdinalIgnoreCase));
+        }
+
+        FilteredProducts = filtered.ToList();
     }
+
 }

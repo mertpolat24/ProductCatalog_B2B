@@ -1,61 +1,64 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Solvo_Core.Models;
+﻿using Solvo_Core.Models;
+using Solvo_Repository.Context;
 using Solvo_Service.Contracts;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Solvo_Service
 {
-    using Microsoft.AspNetCore.Identity;
-    using Solvo_Core.Models;
     public class UserService : IUserService
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly RepositoryContext _context;
 
-        public UserService(UserManager<User> userManager,
-                           SignInManager<User> signInManager)
+        public UserService(RepositoryContext context)   
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-        }
-
-        public User? GetById(string userId)
-        {
-            return _userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
+            _context = context;
         }
 
         public List<User> GetAll()
         {
-            return _userManager.Users.ToList();
-        }
-
-        public IdentityResult Create(User user, string password)
-        {
-            return _userManager.CreateAsync(user, password).GetAwaiter().GetResult();
-        }
-
-        public SignInResult PasswordSignIn(string email, string password, bool rememberMe)
-        {
-            var user = _userManager.FindByEmailAsync(email).GetAwaiter().GetResult();
-            if (user == null)
-                return SignInResult.Failed;
-
-            return _signInManager.PasswordSignInAsync(user, password, rememberMe, false)
-                                  .GetAwaiter().GetResult();
-        }
-
-        public void SignOut()
-        {
-            _signInManager.SignOutAsync().GetAwaiter().GetResult();
+            return _context.Users.ToList();
         }
 
         public bool IsEmailTaken(string email)
         {
-            return _userManager.FindByEmailAsync(email).GetAwaiter().GetResult() != null;
+            return _context.Users.Any(u => u.Email == email);
+        }
+
+        public void Create(User user)
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
+        }
+
+        public User? Login(string email, string passwordHash)
+        {
+            return _context.Users
+                .FirstOrDefault(u => u.Email == email && u.PasswordHash == passwordHash);
+        }
+        public bool PasswordSignIn(string email, string password)
+        {
+            var user = _context.Users.Where(u => u.Email == email)
+                                     .FirstOrDefault();
+            if (user == null)
+                return false;
+
+            var hashedInput = ComputeSha256Hash(password);
+            return user.PasswordHash == hashedInput;
+        }
+
+        private string ComputeSha256Hash(string rawData)
+        {
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
+            return Convert.ToHexString(bytes); // .NET 5+
+        }
+        
+
+        public User? GetById(string id)
+        {
+            return _context.Users.Find(id);
         }
     }
 }

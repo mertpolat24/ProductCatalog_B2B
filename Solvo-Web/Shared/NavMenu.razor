@@ -26,6 +26,7 @@
     {
         public string Category { get; set; } = "";
         public string Brand { get; set; } = "";
+        public string Name { get; set; } = "";
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public bool OnlyInStock { get; set; }
@@ -48,5 +49,6 @@
             <input class="form-check-input" type="checkbox" @bind="OnlyInStock" id="onlyInStockCheck" />
             <label class="form-check-label" for="onlyInStockCheck">Stokta Olanlar</label>
         </div>
+
     </form>
 </nav>

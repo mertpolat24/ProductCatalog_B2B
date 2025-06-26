@@ -1,4 +1,5 @@
-﻿using Solvo_Core.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Solvo_Core.Models;
 using Solvo_Repository.UnitOfWork;
 using Solvo_Service.Contracts;
 using System;
@@ -32,14 +33,8 @@ namespace Solvo_Service
 
         public IQueryable<Product> GetAllProduct()
         {
-            return _manager.ProductRepository.FindAll();
+            return _manager.ProductRepository.FindAll().Include(p => p.Brand).Include(p => p.Category).AsQueryable();
 
-        }
-
-        public IQueryable<Product> GetByFiltered(int? categoryId, List<int?> brandIdList, bool? inStock, (decimal? minPrice, decimal? maxPrice)? priceRange, bool? orderByPrice)
-        {
-            var filtred = _manager.ProductRepository.GetByFiltered(categoryId, brandIdList, inStock, priceRange, orderByPrice);
-            return filtred;
         }
 
         public Product? GetProductById(int id)

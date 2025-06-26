@@ -10,11 +10,12 @@ namespace Solvo_Service.Contracts
 {
     public interface IUserService
     {
-        User? GetById(string userId);
-        List<User> GetAll();
-        IdentityResult Create(User user, string password);
-        SignInResult PasswordSignIn(string email, string password, bool rememberMe);
-        void SignOut();
+        void Create(User user);
         bool IsEmailTaken(string email);
+        List<User> GetAll();
+        User? GetById(string id);
+        bool PasswordSignIn(string email, string password);
+
     }
+
 }

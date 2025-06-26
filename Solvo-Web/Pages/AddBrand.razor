@@ -1,0 +1,158 @@
+﻿@page "/add-brands"
+@using Microsoft.EntityFrameworkCore
+@using Solvo_Core.Enums
+@using Solvo_Core.Models
+@using Solvo_Repository.Context
+@using Solvo_Web.Data
+@inject RepositoryContext context
+@inject IJSRuntime JS
+@inject AppState AppState
+@inject NavigationManager NavManager
+
+<h3>Marka Yönetimi</h3>
+
+<button class="btn btn-success mb-3" @onclick="StartAdding">Yeni Marka Ekle</button>
+@if (!AppState.IsAdmin)
+{
+    NavManager.NavigateTo("/error");
+}
+else
+{
+    @if (editBrand != null)
+    {
+        <div class="card mb-3 p-3">
+            <EditForm Model="editBrand" OnValidSubmit="SaveBrand">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-2">
+                    <label>Marka Adı</label>
+                    <InputText @bind-Value="editBrand.Name" class="form-control" />
+                </div>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="durum" @bind="StatusSelect" />
+                    <label class="form-check-label" for="durum">Yayınla</label>
+                </div>
+
+                <button type="submit" class="btn btn-success mt-2 me-2">Kaydet</button>
+                <button type="button" class="btn btn-secondary mt-2" @onclick="CancelEdit">İptal</button>
+            </EditForm>
+        </div>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Adı</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var brand in brands)
+            {
+                <tr>
+                    <td>@brand.Id</td>
+                    <td>@brand.Name</td>
+                    <td>@brand.CreateDate.ToString("dd.MM.yyyy")</td>
+                    <td>
+                        @if (brand.Status == BaseStatus.Active)
+                        {
+                            <span class="badge bg-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Pasif</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm me-2" @onclick="() => StartEditing(brand)">Düzenle</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteBrand(brand.Id)">Sil</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private List<Brand> brands = new();
+    private Brand? editBrand;
+    private bool StatusSelect;
+
+    protected override void OnInitialized()
+    {
+        LoadBrands();
+    }
+
+    private void LoadBrands()
+    {
+        brands = context.Brands.ToList();
+    }
+
+    private void StartAdding()
+    {
+        editBrand = new Brand();
+        StatusSelect = false;
+    }
+
+    private void StartEditing(Brand brand)
+    {
+        editBrand = new Brand
+            {
+                Id = brand.Id,
+                Name = brand.Name,
+                Status = brand.Status
+            };
+        StatusSelect = brand.Status == BaseStatus.Active;
+    }
+
+    private void CancelEdit()
+    {
+        editBrand = null;
+    }
+
+    private void SaveBrand()
+    {
+        if (editBrand == null) return;
+
+        editBrand.Status = StatusSelect ? BaseStatus.Active : BaseStatus.Passive;
+
+        if (editBrand.Id == 0)
+        {
+            editBrand.CreateDate = DateTime.Now;
+            context.Brands.Add(editBrand);
+        }
+        else
+        {
+            var existing = context.Brands.Find(editBrand.Id);
+            if (existing != null)
+            {
+                existing.Name = editBrand.Name;
+                existing.Status = editBrand.Status;
+            }
+        }
+
+        context.SaveChanges();
+        LoadBrands();
+        editBrand = null;
+    }
+
+    private async Task DeleteBrand(int id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("showDeleteConfirm");
+
+        if (confirmed)
+        {
+            var brand = context.Brands.Find(id);
+            if (brand != null)
+            {
+                context.Brands.Remove(brand);
+                context.SaveChanges();
+                LoadBrands();
+            }
+        }
+    }
+}

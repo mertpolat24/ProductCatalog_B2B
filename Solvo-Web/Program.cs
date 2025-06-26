@@ -12,6 +12,8 @@ using Solvo_Repository;
 using Solvo_Service.Contracts;
 using Solvo_Service;
 using Microsoft.Extensions.DependencyInjection;
+using Solvo_Core.Models;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,25 +24,22 @@ var connectionString = builder.Configuration.GetConnectionString("SqlConn");
 builder.Services.AddDbContext<RepositoryContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-})
-    .AddEntityFrameworkStores<RepositoryContext>();
-
 
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<AppState>();
+builder.Services.AddIgniteUIBlazor();
 
 
 
@@ -58,9 +57,6 @@ app.UseStaticFiles();
 
 
 app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 app.MapBlazorHub();

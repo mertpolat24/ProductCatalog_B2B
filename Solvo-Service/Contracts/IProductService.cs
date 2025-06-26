@@ -14,6 +14,5 @@ namespace Solvo_Service.Contracts
         void CreateProduct(Product entity);
         void UpdateProduct(Product entity);
         void DeleteProduct(Product entity);
-        IQueryable<Product> GetByFiltered(int? categoryId, List<int?> brandIdList, bool? inStock, (decimal? minPrice, decimal? maxPrice)? priceRange, bool? orderByPrice);
     }
 }

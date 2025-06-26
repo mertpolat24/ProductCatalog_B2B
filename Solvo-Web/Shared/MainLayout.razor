@@ -1,51 +1,152 @@
-﻿    @inherits LayoutComponentBase
-    @inject NavigationManager NavManager
+﻿@using Microsoft.AspNetCore.WebUtilities
+@using Solvo_Core.Models
+@using Solvo_Web.Data
+@using Solvo_Web.Pages
+@using static Solvo_Web.Shared.NavMenu
+@inject AppState AppState
+@inject IJSRuntime JS
+@inherits LayoutComponentBase
+@inject NavigationManager NavManager
 
-    @using Microsoft.AspNetCore.WebUtilities
-    @using Solvo_Core.Models
-    @using Solvo_Web.Pages
-    @using static Solvo_Web.Shared.NavMenu
+
+<div id="wrapper">
+    @if (showSidebar)
+    {
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <hr class="sidebar-divider my-0" />
+
+            <div class="sidebar-heading text-white">
+                SolvoB2B
+            </div>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Ana Menü</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/AllProducts">
+                    <i class="fas fa-boxes"></i>
+                    <span>Tüm Ürünler</span>
+                </a>
+            </li>
 
 
-
-<CascadingValue Value="Filters">
-    <div class="app-layout">
-        <div class="sidebar">
-            <nav>
-                <ul>
-                    <li><NavLink class="btn btn-outline-primary me-2" href="/" Match="NavLinkMatch.All">🏠 Ana Sayfa</NavLink></li>                    
-                    <li><NavLink class="btn btn-outline-primary me-2" href="/products" Match="NavLinkMatch.All">📦 Ürünler</NavLink></li>
-                    <button class="btn btn-outline-primary mb-2" @onclick="() => ShowFilters = !ShowFilters">
-                        @(ShowFilters ? "Filtreleri Gizle" : "Filtreleri Göster")
-                    </button>
-                </ul>
-            </nav>
-            @if (ShowFilters)
+            @if (AppState.IsAdmin == false)
             {
-                <div class="mt-4 px-3">
-                    <input class="form-control mb-2" placeholder="Kategori" @bind="Filters.Category" />
-                    <input class="form-control mb-2" placeholder="Marka" @bind="Filters.Brand" />
-                    <input class="form-control mb-2" type="number" placeholder="Min ₺" min="0" @bind="Filters.MinPrice" />
-                    <input class="form-control mb-2" type="number" placeholder="Max ₺" min="0" @bind="Filters.MaxPrice" />
-                    <input class="form-check-input" type="checkbox" @bind="Filters.OnlyInStock" />
-                    <label class="form-check-label">Stokta Olanlar</label>
-                </div>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/login" Match="NavLinkMatch.All">
+                        <i class="fas fa-fw fa-sign-in-alt"></i>
+                        <span>Giriş Yap</span>
+                    </NavLink>
+                </li>
             }
-         </div>
-    </div>
+            @if (AppState.IsAdmin)
+            {
 
-    <div class="main-content">
-        @Body
-    </div>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin-products">
+                        <i class="fas fa-fw fa-box"></i>
+                        <span>Ürün İşlemleri</span>
+                    </a>
+                </li>
 
-</CascadingValue>
+                <li class="nav-item">
+                    <a class="nav-link" href="/add-categories">
+                        <i class="fas fa-fw fa-th-large"></i>
+                        <span>Kategori İşlemleri</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/add-brands">
+                        <i class="fas fa-fw fa-tags"></i>
+                        <span>Marka İşlemleri</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/CreateAccount">
+                        <i class="fas fa-user-plus"></i>  
+                        <span>Yeni Yönetici Oluştur</span>
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <button @onclick="Logout" class="nav-link btn btn-link text-start text-white">
+                        <i class="fas fa-fw fa-sign-out-alt"></i>
+                        <span>Çıkış Yap</span>
+                    </button>
+                </li>
+            }
+
+        </ul>
+
+    }
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <div id="content">
+            <_TopBar />
+            <div class="container-fluid">
+                @Body
+            </div>
+
+        </div>
+        <_Footer />
+    </div>
+</div>
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+
+
+
 
 @code {
     private FilterModel Filters = new();
     private bool ShowFilters = false;
+    private bool showSidebar = true;
 
     private void OnFilterChanged(ChangeEventArgs e)
     {
-        StateHasChanged(); 
+        StateHasChanged();
+        AppState.LayoutActive = true;
     }
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += OnLocationChanged;
+        UpdateSidebarVisibility();
     }
+
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        UpdateSidebarVisibility();
+        StateHasChanged();
+    }
+
+    private void UpdateSidebarVisibility()
+    {
+        var uri = NavManager.ToBaseRelativePath(NavManager.Uri).ToLower();
+        showSidebar = uri != "login";
+    }
+
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
+    async Task Logout()
+    {
+        var confirmed = await JS.InvokeAsync<bool>("showLogoutConfirm");
+
+        if (confirmed)
+        {
+            AppState.IsAdmin = false;
+            AppState.PageActive = true;
+            NavManager.NavigateTo("/");
+        }
+    }
+}

@@ -1,0 +1,87 @@
+﻿@using Solvo_Service
+@using Solvo_Web.Data
+@using Solvo_Web.Pages
+@using static Solvo_Web.Shared.NavMenu
+@using Solvo_Service.Contracts
+@inject IUserService UserService
+@inject NavigationManager NavManager
+@inject AppState AppState
+
+@if (showTopbar)
+{
+    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+        </button>
+
+        <div class="container-fluid d-flex justify-content-between align-items-center w-100">
+            <div class="input-group w-50">
+                <input type="text"
+                       class="form-control bg-light border-0 small"
+                       placeholder="Ürün ara..."
+                       @bind="SearchText"
+                       @onkeydown="@HandleKeyDown" />
+
+                <div class="input-group-append">
+                    <button class="btn btn-primary" @onclick="SearchProducts">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="btn btn-danger" @onclick="ClearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+}
+@code {
+    private bool showTopbar = true;
+    private string SearchText = string.Empty;
+
+    private void SearchProducts()
+    {
+        if (!string.IsNullOrEmpty(SearchText))
+        {
+            var encoded = Uri.EscapeDataString(SearchText);
+            NavManager.NavigateTo($"/?search={encoded}", forceLoad: true);
+        }
+    }
+
+    private void ClearSearch()
+    {
+        SearchText = string.Empty;
+        NavManager.NavigateTo("/", forceLoad: true); 
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SearchProducts();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += OnLocationChanged;
+        UpdateSidebarVisibility();
+    }
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        UpdateSidebarVisibility();
+        StateHasChanged();
+    }
+
+    private void UpdateSidebarVisibility()
+    {
+        var uri = NavManager.ToBaseRelativePath(NavManager.Uri).ToLower();
+        showTopbar = uri != "login";
+    }
+
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
+}
