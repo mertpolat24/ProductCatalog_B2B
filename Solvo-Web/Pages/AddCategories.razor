@@ -166,6 +166,8 @@ else
             {
                 context.Categories.Remove(cat);
                 context.SaveChanges();
+                AppState.LastMessage = "Kategori başarıyla silindi!";
+                AppState.LastMessageType = "success";
                 LoadCategories();
             }
         }

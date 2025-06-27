@@ -165,6 +165,8 @@ else
             {
                 context.Brands.Remove(brand);
                 context.SaveChanges();
+                AppState.LastMessage = "Marka başarıyla silindi!";
+                AppState.LastMessageType = "success";
                 LoadBrands();
             }
         }
