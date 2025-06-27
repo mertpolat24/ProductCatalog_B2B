@@ -1,0 +1,19 @@
+﻿@inject NavigationManager NavManager
+
+@code {
+    @inject NavigationManager NavigationManager
+
+    @code {
+        private bool redirected = false;
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            if (firstRender && !redirected && !NavigationManager.Uri.EndsWith("/error"))
+            {
+                redirected = true;
+                NavigationManager.NavigateTo("/error", true);
+            }
+        }
+    }
+}
+    
