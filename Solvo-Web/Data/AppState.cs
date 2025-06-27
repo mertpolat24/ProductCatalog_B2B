@@ -2,7 +2,7 @@
 {
     public class AppState
     {
-        private bool _isAdmin = true;
+        private bool _isAdmin = true; //İlk Admin eklendikten sonra false yapın.
         public bool IsAdmin
         {
             get => _isAdmin;
@@ -15,6 +15,8 @@
                 }
             }
         }
+        public string? LastMessage { get; set; }
+        public string? LastMessageType { get; set; }
 
         private bool _pageActive = true;
         public bool PageActive

@@ -1,28 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
-    var ctx = document.getElementById("myAreaChart");
-    if (!ctx) return; // DOM'da yoksa çizim yapma
+    const ctx = document.getElementById("myChart");
 
-    var myAreaChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            datasets: [{
-                label: "Earnings",
-                data: [0, 10000, 5000, 15000, 10000, 20000],
-                backgroundColor: "rgba(78, 115, 223, 0.05)",
-                borderColor: "rgba(78, 115, 223, 1)",
-            }],
-        },
-        options: {
-            maintainAspectRatio: false,
-            scales: {
-                xAxes: [{ time: { unit: 'date' }, gridLines: { display: false } }],
-                yAxes: [{
-                    ticks: { beginAtZero: true },
-                    gridLines: { color: "rgba(234, 236, 244, 1)" }
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["Ocak", "Þubat", "Mart", "Nisan", "Mayýs"],
+                datasets: [{
+                    label: 'Satýþlar',
+                    data: [12, 19, 3, 5, 2],
+                    borderWidth: 1
                 }]
             },
-            legend: { display: false }
-        }
-    });
+            options: {
+                responsive: true
+            }
+        });
+    } else {
+        console.error("myChart bulunamadý DOM'da.");
+    }
+
 });

@@ -10,11 +10,21 @@
 @inject NavigationManager NavManager
 
 <h3>Marka Yönetimi</h3>
+@if (!string.IsNullOrEmpty(AppState.LastMessage))
+{
+    var cssClass = AppState.LastMessageType == "success" ? "alert alert-success" :
+                   AppState.LastMessageType == "error" ? "alert alert-danger" :
+                   "alert alert-info";
 
+    <div class="@cssClass" role="alert">@AppState.LastMessage</div>
+
+    AppState.LastMessage = null;
+    AppState.LastMessageType = null;
+}
 <button class="btn btn-success mb-3" @onclick="StartAdding">Yeni Marka Ekle</button>
 @if (!AppState.IsAdmin)
 {
-    NavManager.NavigateTo("/error");
+    NavManager.NavigateTo("/error",true);
 }
 else
 {
@@ -124,6 +134,7 @@ else
         {
             editBrand.CreateDate = DateTime.Now;
             context.Brands.Add(editBrand);
+            AppState.LastMessage = "Marka başarıyla eklendi!";
         }
         else
         {
@@ -132,13 +143,16 @@ else
             {
                 existing.Name = editBrand.Name;
                 existing.Status = editBrand.Status;
+                AppState.LastMessage = "Marka başarıyla güncellendi!";
             }
         }
 
+        AppState.LastMessageType = "success";
         context.SaveChanges();
         LoadBrands();
         editBrand = null;
     }
+
 
     private async Task DeleteBrand(int id)
     {

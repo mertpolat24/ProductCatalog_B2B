@@ -10,12 +10,22 @@
 @inject NavigationManager NavManager
 
 <h3>Kategori Yönetimi</h3>
+@if (!string.IsNullOrEmpty(AppState.LastMessage))
+{
+    var cssClass = AppState.LastMessageType == "success" ? "alert alert-success" :
+                   AppState.LastMessageType == "error" ? "alert alert-danger" :
+                   "alert alert-info";
 
+    <div class="@cssClass" role="alert">@AppState.LastMessage</div>
+
+    AppState.LastMessage = null;
+    AppState.LastMessageType = null;
+}
 <button class="btn btn-success mb-3" @onclick="StartAdding">Yeni Kategori Ekle</button>
 
 @if (!AppState.IsAdmin)
 {
-    NavManager.NavigateTo("/error");
+    NavManager.NavigateTo("/error", true);
 }
 else
 {
@@ -125,6 +135,7 @@ else
         {
             editCategory.CreateDate = DateTime.Now;
             context.Categories.Add(editCategory);
+            AppState.LastMessage = "Kategori başarıyla eklendi!";
         }
         else
         {
@@ -133,13 +144,16 @@ else
             {
                 existing.Name = editCategory.Name;
                 existing.Status = editCategory.Status;
+                AppState.LastMessage = "Kategori başarıyla güncellendi!";
             }
         }
 
+        AppState.LastMessageType = "success";
         context.SaveChanges();
         LoadCategories();
         editCategory = null;
     }
+
 
     private async Task DeleteCategory(int id)
     {

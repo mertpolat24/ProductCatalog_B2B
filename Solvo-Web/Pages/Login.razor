@@ -8,106 +8,99 @@
 @inject AppState AppState
 
 <style>
-    /* Arka plan - öncekinin açık soft stili */
     .login-page {
-    background-color: #f8f9fc;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    position: relative;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fc;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Geri butonu */
     .back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    border: 2px solid #3949ab;
-    color: #3949ab;
-    background: transparent;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease, color 0.3s ease;
-    z-index: 10;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        border: 2px solid #3949ab;
+        color: #3949ab;
+        background: transparent;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease, color 0.3s ease;
+        z-index: 10;
     }
 
-    .back-button:hover {
-    background: #3949ab;
-    color: white;
-    }
+        .back-button:hover {
+            background: #3949ab;
+            color: white;
+        }
 
-    /* Kart stil - öncekinin soft gölgesi ve temizliği */
     .login-card {
-    max-width: 500px;
-    width: 100%;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgb(0 0 0 / 0.15);
-    padding: 40px 30px;
-    text-align: center;
+        max-width: 500px;
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgb(0 0 0 / 0.15);
+        padding: 40px 30px;
+        text-align: center;
     }
 
-    /* Başlık */
-    .login-card h2 {
-    color: #3949ab;
-    margin-bottom: 10px;
-    font-weight: 700;
-    }
+        .login-card h2 {
+            color: #3949ab;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
 
-    /* Inputlar - büyük, renkli, cam efekti, tam ortalanmış */
-    .login-card input.form-control {
-    background: rgba(57, 73, 171, 0.1);
-    border: 2px solid #3949ab;
-    border-radius: 10px;
-    color: #3949ab;
-    font-size: 1.2rem;
-    height: 50px;
-    margin-bottom: 25px;
-    text-align: center;
-    transition: background 0.3s ease, border-color 0.3s ease;
-    }
+        .login-card input.form-control {
+            background: rgba(57, 73, 171, 0.1);
+            border: 2px solid #3949ab;
+            border-radius: 10px;
+            color: #3949ab;
+            font-size: 1.2rem;
+            height: 50px;
+            margin-bottom: 25px;
+            text-align: center;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
 
-    .login-card input.form-control::placeholder {
-    color: #3949ab99;
-    }
+            .login-card input.form-control::placeholder {
+                color: #3949ab99;
+            }
 
-    .login-card input.form-control:focus {
-    background: rgba(57, 73, 171, 0.15);
-    border-color: #1a237e;
-    outline: none;
-    box-shadow: 0 0 10px #1a237e88;
-    color: #1a237e;
-    }
+            .login-card input.form-control:focus {
+                background: rgba(57, 73, 171, 0.15);
+                border-color: #1a237e;
+                outline: none;
+                box-shadow: 0 0 10px #1a237e88;
+                color: #1a237e;
+            }
 
-    /* Giriş butonu */
     .btn-primary {
-    background: #3949ab;
-    border: none;
-    padding: 14px 0;
-    font-weight: 700;
-    font-size: 1.1rem;
-    border-radius: 10px;
-    width: 100%;
-    transition: background 0.3s ease;
+        background: #3949ab;
+        border: none;
+        padding: 14px 0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        width: 100%;
+        transition: background 0.3s ease;
     }
 
-    .btn-primary:hover {
-    background: #1a237e;
-    }
+        .btn-primary:hover {
+            background: #1a237e;
+        }
 
-    /* Uyarı mesajı */
     .alert-warning {
-    background: #ff7043;
-    color: white;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    padding: 10px;
+        background: #ff7043;
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        padding: 10px;
     }
 </style>
 
@@ -118,6 +111,13 @@
     </button>
 
     <div class="login-card">
+        <h2>Hoşgeldiniz</h2>
+
+        @if (wrongAttempts > 0 && wrongAttempts < 4)
+        {
+            <div class="mb-3 text-danger fw-bold">Kalan deneme hakkınız: @(4 - wrongAttempts)</div>
+        }
+
         @if (!string.IsNullOrEmpty(message))
         {
             <div class="alert alert-warning">@message</div>
@@ -137,6 +137,7 @@
     </div>
 </div>
 
+
 @code {
     private User user = new User();
     private string email = string.Empty;
@@ -154,13 +155,13 @@
 
     private void LoginUser()
     {
-        if (wrongAttempts <= 3 )
+        if (wrongAttempts <= 3)
         {
             bool result = UserService.PasswordSignIn(email, password);
             if (result)
             {
                 AppState.IsAdmin = true;
-                NavManager.NavigateTo("/");
+                NavManager.NavigateTo("/", true);
                 AppState.PageActive = false;
             }
             else
@@ -169,14 +170,19 @@
                 wrongAttempts += 1;
             }
         }
-        else 
+        else if (wrongAttempts > 3)
         {
             message = "Çok fazla yanlış giriş denemesi yaptınız. Lütfen daha sonra tekrar deneyin.";
+            wrongAttempts += 1;
+            if (wrongAttempts > 6)
+                NavManager.NavigateTo("/", true);
         }
+
+
     }
 
     private void GoBack()
     {
-        NavManager.NavigateTo("/");
+        NavManager.NavigateTo("/", true);
     }
 }

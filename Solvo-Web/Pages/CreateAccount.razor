@@ -9,10 +9,21 @@
 @inject AppState AppState
 
 
-<h3>Hesap Oluştur</h3>
+<h3>Yönetici Oluştur</h3>
+@if (!string.IsNullOrEmpty(AppState.LastMessage))
+{
+    var cssClass = AppState.LastMessageType == "success" ? "alert alert-success" :
+                   AppState.LastMessageType == "error" ? "alert alert-danger" :
+                   "alert alert-info";
+
+    <div class="@cssClass mt-3">@AppState.LastMessage</div>
+
+    AppState.LastMessage = null;
+    AppState.LastMessageType = null;
+}
 @if (!AppState.IsAdmin)
 {
-    NavManager.NavigateTo("/error");
+    NavManager.NavigateTo("/error",true);
 }
 else
 {
@@ -20,22 +31,6 @@ else
         <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
             <DataAnnotationsValidator />
             <ValidationSummary />
-
-            <div class="mb-3">
-                <label for="username">Kullanıcı Adı</label>
-                <InputText id="username" class="form-control" @bind-Value="registerModel.Username" />
-            </div>
-
-            <div class="mb-3">
-                <label for="firstname">İsim</label>
-                <InputText id="firstname" class="form-control" @bind-Value="registerModel.FirstName" />
-            </div>
-
-            <div class="mb-3">
-                <label for="lastname">Soyisim</label>
-                <InputText id="lastname" class="form-control" @bind-Value="registerModel.LastName" />
-            </div>
-
             <div class="mb-3">
                 <label for="email">E-posta</label>
                 <InputText id="email" type="email" class="form-control" @bind-Value="registerModel.Email" />
@@ -46,30 +41,26 @@ else
                 <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" />
             </div>
 
-            <button type="submit" class="btn btn-success">Kayıt Ol</button>
+            <button type="submit" class="btn btn-success">Oluştur</button>
         </EditForm>
     </div>
-}
-@if (!string.IsNullOrEmpty(Message))
-{
-    <div class="alert alert-info mt-3">@Message</div>
 }
 
 @code {
     private RegisterModel registerModel = new RegisterModel();
-    private string? Message;
     protected override async Task OnInitializedAsync()
     {
         if (AppState.IsAdmin == false)
         {
-            await InvokeAsync(() => NavManager.NavigateTo("/error"));
+            await InvokeAsync(() => NavManager.NavigateTo("/error", true));
         }
     }
     private async Task HandleRegister()
     {
         if (UserService.IsEmailTaken(registerModel.Email))
         {
-            Message = "Bu e-posta zaten kayıtlı.";
+            AppState.LastMessage = "Bu e-posta zaten kayıtlı.";
+            AppState.LastMessageType = "error";
             return;
         }
 
@@ -82,28 +73,22 @@ else
 
         UserService.Create(user);
 
-        Message = $"Hoşgeldin {registerModel.Username}, kayıt başarılı!";
+        AppState.LastMessage = "Yönetici hesabı başarıyla oluşturuldu!";
+        AppState.LastMessageType = "success";
+        await Task.Delay(3000);
         NavManager.NavigateTo("/login", true);
     }
+
 
     public string ComputeSha256Hash(string rawData)
     {
         using var sha256 = System.Security.Cryptography.SHA256.Create();
         byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
-        return Convert.ToHexString(bytes); // .NET 5+ içindir
+        return Convert.ToHexString(bytes);
     }
 
     public class RegisterModel
     {
-        [Required(ErrorMessage = "Kullanıcı adı boş olamaz")]
-        public string Username { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "İsim gerekli")]
-        public string FirstName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Soyisim gerekli")]
-        public string LastName { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "E-posta gerekli")]
         [EmailAddress(ErrorMessage = "Geçerli bir e-posta girin")]
         public string Email { get; set; } = string.Empty;

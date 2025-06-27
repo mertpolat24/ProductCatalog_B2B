@@ -36,12 +36,18 @@
 </style>
 
 <h3 class="mb-4">Ürün Yönetimi</h3>
-
+@if (!string.IsNullOrEmpty(AppState.LastMessage))
+{
+    var cssClass = AppState.LastMessageType == "success" ? "alert alert-success" : "alert alert-danger";
+    <div class="@cssClass">@AppState.LastMessage</div>
+    AppState.LastMessage = null;
+    AppState.LastMessageType = null;
+}
 <a href="/add-product" class="btn btn-success mb-3">Yeni Ürün Ekle</a>
 
 @if (!AppState.IsAdmin)
 {
-    NavManager.NavigateTo("/error");
+    NavManager.NavigateTo("/error", true);
 }
 else
 {
@@ -69,7 +75,7 @@ else
                     <td>@product.Name</td>
                     <td>@product.Description</td>
                     <td>@product.ImagePath</td>
-                    <td>@product.Price.ToString("C")</td>
+                    <td>@product.Price.ToString()₺</td>
                     <td>@product.Stock</td>
                     <td>@product.Category?.Name</td>
                     <td>@product.Brand?.Name</td>
@@ -83,7 +89,7 @@ else
                             <span class="badge bg-secondary">Pasif</span>
                         }
                     </td>
-                    <td>@product.CreateDate.ToString("g")</td>
+                    <td>@product.CreateDate.ToString("R")</td>
                     <td>
                         <button class="btn btn-primary btn-sm me-2" @onclick="() => StartEditing(product)">Düzenle</button>
                         <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDelete(product.Id)">Sil</button>
@@ -252,14 +258,23 @@ else
             productToUpdate.Status = editStatus ? BaseStatus.Active : BaseStatus.Passive;
 
             DbContext.SaveChanges();
+            AppState.LastMessage = "Ürün başarıyla güncellendi!";
+            AppState.LastMessageType = "success";
+
             editProduct = null;
             LoadProducts();
         }
+        else
+        {
+            AppState.LastMessage = "Ürün güncellenirken bir hata oluştu!";
+            AppState.LastMessageType = "error";
+        }
     }
+
 
     private async Task ConfirmDelete(int id)
     {
-        var confirmed = await JS.InvokeAsync<bool>("showLogoutConfirm");
+        var confirmed = await JS.InvokeAsync<bool>("showDeleteConfirm");
 
         if (confirmed)
         {
@@ -268,7 +283,16 @@ else
             {
                 DbContext.Products.Remove(product);
                 DbContext.SaveChanges();
+
+                AppState.LastMessage = "Ürün başarıyla silindi!";
+                AppState.LastMessageType = "success";
+
                 LoadProducts();
+            }
+            else
+            {
+                AppState.LastMessage = "Ürün silinirken hata oluştu!";
+                AppState.LastMessageType = "error";
             }
         }
     }
