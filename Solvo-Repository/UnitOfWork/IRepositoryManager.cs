@@ -12,6 +12,7 @@ namespace Solvo_Repository.UnitOfWork
         IBrandRepository BrandRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         IProductRepository ProductRepository { get; }
+        IUserRepository UserRepository { get; }
         void Save();
     }
 }
