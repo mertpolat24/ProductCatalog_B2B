@@ -2,7 +2,7 @@
 {
     public class AppState
     {
-        private bool _isAdmin = true; //After adding the first admin, set it to false
+        private bool _isAdmin = false; //After adding the first admin, set it to false
         public bool IsAdmin
         {
             get => _isAdmin;
